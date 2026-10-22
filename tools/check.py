@@ -27,7 +27,7 @@ def check(ok: bool, msg: str, detail: str = "") -> bool:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description="Check Qafila pipeline outputs")
     ap.add_argument("--data-dir", type=Path, default=ROOT / "data")
     ap.add_argument("--warehouse", type=Path, default=ROOT / "warehouse")
     args = ap.parse_args()

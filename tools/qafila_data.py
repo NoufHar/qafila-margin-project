@@ -653,7 +653,7 @@ def main(force: bool = False, seed: int = SEED, raw: Path = RAW) -> None:
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description="Generate Qafila sample data")
     ap.add_argument("--force", action="store_true", help="regenerate even if data exists")
     ap.add_argument("--seed", type=int, default=SEED, help=f"random seed (default {SEED}, the dataset every lab uses)")
     ap.add_argument("--out", type=Path, default=RAW, help="output folder (default data/)")

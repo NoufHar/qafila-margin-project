@@ -38,7 +38,7 @@ def add_correction(data: Path) -> Path:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(description="Generate Qafila test data")
     ap.add_argument("--seed", type=int, default=qafila_data.SEED)
     ap.add_argument("--out", type=Path, default=qafila_data.RAW, help="output folder (default data/)")
     ap.add_argument("--add-correction", action="store_true", help=f"only add suppliers/{CORRECTION} to existing data")
