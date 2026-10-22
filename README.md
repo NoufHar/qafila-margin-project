@@ -76,3 +76,7 @@ I would use incremental processing instead of rebuilding the tables every time. 
 ## AI assistance
 
 I used ChatGPT as a supporting tool for troubleshooting and clarifying technical concepts during development.
+
+### Additional Note
+
+I accidentally removed some comments and docstrings while cleaning up the code. I fixed the affected CLI descriptions and tested the scripts afterward. Everything worked successfully, and `tools/check.py` passed all **22/22 checks**.
