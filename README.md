@@ -79,4 +79,8 @@ I used ChatGPT as a supporting tool for troubleshooting and clarifying technical
 
 ### Additional Note
 
-I accidentally removed some comments and docstrings while cleaning up the code. I fixed the affected CLI descriptions and tested the scripts afterward. Everything worked successfully, and `tools/check.py` passed all **22/22 checks**.
+I accidentally removed some comments and docstrings while cleaning up the code. This caused an issue in three scripts (`check.py`, `make_data.py`, and `qafila_data.py`) because they were using `__doc__` for their CLI descriptions.
+
+I fixed the issue by replacing the `__doc__` references with fixed description strings without changing the original functionality.
+
+After the fix, I tested all three scripts successfully, and `tools/check.py` passed all **22/22 checks**.
