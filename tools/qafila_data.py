@@ -1,15 +1,3 @@
-"""Generate the Qafila dataset (the same generator the course labs use, plus a --seed option).
-
-Called by tools/make_data.py; you don't need to run it directly.
-
-Qafila is a fictional quick-commerce grocery platform in Riyadh, Jeddah and Dammam.
-Everything here is synthetic and generated deterministically from the seed, so the same
-seed always gives byte-identical data and nothing needs a network connection. Seed 2026 is
-the dataset from the course labs. No real person, ID number, phone number or IBAN is used.
-
-The data deliberately contains the problems real sources have (see DATA_ISSUES below).
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -165,12 +153,9 @@ REVIEW_AR = {
 }
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 def luhn_digit(body: str) -> str:
-    """Check digit so that body + digit passes the Luhn test (as Saudi national IDs do)."""
+    
     total = 0
     for i, ch in enumerate(reversed(body)):
         d = int(ch)
@@ -228,10 +213,6 @@ def iso_z(dt: datetime) -> str:
 def to_arabic_digits(s: str) -> str:
     return s.translate(str.maketrans("0123456789.", "٠١٢٣٤٥٦٧٨٩٫"))
 
-
-# ---------------------------------------------------------------------------
-# Generators
-# ---------------------------------------------------------------------------
 
 def make_products(rng: random.Random) -> list[dict]:
     products, pid = [], 1000
@@ -548,11 +529,11 @@ def make_supplier_files(rng: random.Random, products: list[dict], out: Path) -> 
             rows.append({"supplier_id": suppliers[by_cat[p["category"]]], "sku": p["sku"].strip(), "product_name_ar": p["name_ar"],
                          "unit_cost": cost, "valid_from": monday, "min_order_qty": rng.choice([6, 12, 24, 48])})
         path = out / f"prices_2026-W{week}.csv"
-        if week == 38:  # decimal commas and Arabic-Indic digits from a supplier's Excel export
+        if week == 38:  
             for r in rows:
                 v = f"{r['unit_cost']:.2f}".replace(".", ",")
                 r["unit_cost"] = to_arabic_digits(f"{r['unit_cost']:.2f}") if rng.random() < 0.2 else v
-        if week == 39:  # contract change: renamed column, new column, bad values, unknown SKUs
+        if week == 39: 
             for r in rows:
                 r["cost_sar"] = r.pop("unit_cost")
                 r["currency"] = "SAR"
@@ -581,10 +562,6 @@ def make_reviews(rng: random.Random, orders: list[dict], items: list[dict], prod
                         "lang": "ar" if arabic else "en", "review_text": text, "created_at": created.strftime("%Y-%m-%d %H:%M:%S")})
     return reviews
 
-
-# ---------------------------------------------------------------------------
-# Writers
-# ---------------------------------------------------------------------------
 
 def write_sqlite(path: Path, tables: dict[str, list[dict]], ddl: dict[str, str]) -> None:
     if path.exists():
@@ -628,7 +605,6 @@ DDL = {
 
 
 def main(force: bool = False, seed: int = SEED, raw: Path = RAW) -> None:
-    """Write the dataset to `raw`. A different `seed` gives a different dataset with the same shape and issues."""
     marker = raw / "_SUCCESS"
     if marker.exists() and not force:
         print(f"data already prepared in {raw} (use --force to regenerate)")
@@ -641,13 +617,11 @@ def main(force: bool = False, seed: int = SEED, raw: Path = RAW) -> None:
     products = make_products(rng)
     customers0 = make_customers(rng, 6000)
     snapshot, cdc_events, final_state = make_cdc(rng, customers0)
-    # Orders use every customer that ever existed (erased customers leave orphan orders behind)
     everyone = {c["customer_id"]: c for c in snapshot}
     for e in cdc_events:
         if e["op"] == "c":
             everyone.setdefault(e["after"]["customer_id"], e["after"])
     orders, items = make_orders(rng, everyone, products)
-    # customers created in September cannot order before they exist: shift those orders' customer
     created = {cid: c["created_at"] for cid, c in everyone.items()}
     old_ids = [c["customer_id"] for c in snapshot]
     for o in orders:

@@ -1,0 +1,1 @@
+with x as (select *,lag(unit_cost_sar) over(partition by sku order by valid_from) as prev from {{ ref('product_cost_history') }}) select * from x where unit_cost_sar=prev

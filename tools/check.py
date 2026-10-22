@@ -1,12 +1,3 @@
-"""Check your outputs against the contract in BRIEF.md before you submit.
-
-    uv run python tools/check.py --data-dir data --warehouse warehouse
-
-It checks shape and internal consistency: table names, columns, keys, SCD2 rules, that the margin
-adds up, Iceberg history and your dbt tests. It does NOT know the correct costs or margins: the
-grader compares those with the right answer on a dataset you haven't seen.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -46,12 +37,12 @@ def main() -> None:
         sys.exit(1)
     cat = SqlCatalog("qafila", uri=f"sqlite:///{(wh / 'catalog.db').as_posix()}", warehouse=wh.as_posix())
 
-    # 1. the three tables, with the contract's columns
+    
     df: dict[str, pd.DataFrame] = {}
     for name, cols in COLUMNS.items():
         try:
             t = cat.load_table(name)
-        except Exception:  # noqa: BLE001
+        except Exception:  
             check(False, f"table {name} exists", "not found in the catalog 'qafila'")
             continue
         d = t.scan().to_pandas()
@@ -61,7 +52,7 @@ def main() -> None:
     if len(df) < 3:
         sys.exit(1)
 
-    # 2. SCD2 rules
+    
     h = df["silver.product_cost_history"].copy()
     h["valid_from"] = pd.to_datetime(h["valid_from"])
     h["valid_to"] = pd.to_datetime(h["valid_to"])
@@ -77,13 +68,13 @@ def main() -> None:
     same = h.groupby("sku")["unit_cost_sar"].shift() == h["unit_cost_sar"]
     check(not same.any(), "history: a new version only when the cost changes", f"{int(same.sum())} repeated costs")
 
-    # 3. quarantine
+    
     q = df["quality.price_quarantine"]
     bad = set(q["reason"]) - {"unknown_sku", "invalid_cost"}
     check(not bad, "quarantine: reason is 'unknown_sku' or 'invalid_cost'", f"found {bad}")
     check(len(q) > 0, "quarantine: the planted bad supplier rows are there", "empty: the data has some")
 
-    # 4. weekly margin
+    
     m = df["gold.weekly_margin"]
     check(not m.duplicated(["iso_week", "city", "category"]).any(), "margin: one row per (iso_week, city, category)")
     check(m["iso_week"].between(36, 40).all(), "margin: iso_week between 36 and 40")
@@ -103,7 +94,7 @@ def main() -> None:
               "margin: lines and revenue cover every eligible order line",
               f"expected {n} lines / {rev:,.2f} SAR, got {int(m['lines'].sum())} / {m['revenue_sar'].sum():,.2f}")
 
-    # 5. Iceberg history and dbt tests
+   
     snaps = len(cat.load_table("gold.weekly_margin").snapshots())
     check(snaps >= 1, f"Iceberg: gold.weekly_margin has {snaps} snapshot(s); run again and this number should grow")
     rr = ROOT / "dbt" / "target" / "run_results.json"

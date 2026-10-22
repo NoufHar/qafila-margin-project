@@ -1,0 +1,1 @@
+with h as (select sku, valid_from, valid_to, lead(valid_from) over(partition by sku order by valid_from) as next_from from {{ ref('product_cost_history') }}) select * from h where next_from is not null and valid_to is distinct from next_from

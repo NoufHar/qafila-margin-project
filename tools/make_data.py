@@ -1,12 +1,3 @@
-"""Generate the project data.
-
-    uv run python tools/make_data.py                          # data/ (seed 2026, the course dataset)
-    uv run python tools/make_data.py --seed 11 --out data_11  # a different dataset with the same shape and issues
-    uv run python tools/make_data.py --add-correction         # the supplier's late fix for week 39 arrives
-
-Test your pipeline on more than one seed: it's graded on a dataset you haven't seen.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -22,7 +13,7 @@ CORRECTION = "prices_2026-W39_fix.csv"
 
 
 def add_correction(data: Path) -> Path:
-    """Write the supplier's correction for week 39: the zero/negative costs fixed, plus a few renegotiated prices."""
+    
     seed = int((data / "_SEED").read_text())
     rng = random.Random(seed * 1000 + 39)
     with closing(sqlite3.connect(data / "qafila_oltp.sqlite")) as con:

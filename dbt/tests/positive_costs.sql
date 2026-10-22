@@ -1,0 +1,1 @@
+select * from {{ ref('product_cost_history') }} where unit_cost_sar<=0 or unit_cost_sar is null
